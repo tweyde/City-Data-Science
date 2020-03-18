@@ -253,15 +253,24 @@ class EmbeddingsGraph(object):
         image, [self.HEIGHT, self.WIDTH], align_corners=False)
 
     # Then rescale range to [-1, 1) for Inception.
-    image = tf.subtract(image, 0.5)
-    inception_input = tf.multiply(image, 2.0)
+#    image = tf.subtract(image, 0.5)
+#    inception_input = tf.multiply(image, 2.0)
+    inception_input = tf.keras.applications.inception_v3.preprocess_input(img)
 
     # Build Inception layers, which expect a tensor of type float from [-1, 1)
     # and shape [batch_size, height, width, channels].
-    with slim.arg_scope(inception.inception_v3_arg_scope()):
-      _, end_points = inception.inception_v3(inception_input, is_training=False)
+    #with slim.arg_scope(inception.inception_v3_arg_scope()):
+    #  _, end_points = inception.inception_v3(inception_input, is_training=False)
 
-    embedding = end_points['PreLogits']
+    #embedding = end_points['PreLogits']
+
+    image_model = tf.keras.applications.InceptionV3(include_top=False,
+                                                    weights='imagenet')
+    new_input = image_model.input
+    hidden_layer = image_model.layers[-1].output
+
+    embedding = tf.keras.Model(new_input, hidden_layer)
+
     return input_jpeg, embedding
 
   def restore_from_checkpoint(self, checkpoint_path):
@@ -291,8 +300,10 @@ class EmbeddingsGraph(object):
     Returns:
       The Inception embeddings (bottleneck layer output)
     """
-    return self.tf_session.run(
-        self.embedding, feed_dict={self.input_jpeg: batch_image_bytes})
+    #return self.tf_session.run(
+    #    self.embedding, feed_dict={self.input_jpeg: batch_image_bytes})
+
+    return image_features_extract_model(batch_image_bytes)
 
 
 class TFExampleFromImageDoFn(beam.DoFn):
@@ -425,7 +436,7 @@ def default_args(argv):
       default='flowers-' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S'),
       help='A unique job identifier.')
   parser.add_argument(
-      '--num_workers', default=20, type=int, help='The number of workers.')
+      '--num_workers', default=10, type=int, help='The number of workers.')
   parser.add_argument('--cloud', default=False, action='store_true')
   parser.add_argument(
       '--runner',
