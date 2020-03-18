@@ -87,7 +87,7 @@ from tensorflow.keras.applications import inception_v3 as inception
 from tensorflow.python.framework import errors
 from tensorflow.python.lib.io import file_io
 
-slim = tf.contrib.slim
+#slim = tf.contrib.slim
 
 error_count = Metrics.counter('main', 'errorCount')
 missing_label_count = Metrics.counter('main', 'missingLabelCount')
@@ -285,8 +285,8 @@ class EmbeddingsGraph(object):
     # Get all variables to restore. Exclude Logits and AuxLogits because they
     # depend on the input data and we do not need to intialize them from
     # checkpoint.
-    all_vars = tf.contrib.slim.get_variables_to_restore(
-        exclude=['InceptionV3/AuxLogits', 'InceptionV3/Logits', 'global_step'])
+    #all_vars = tf.contrib.slim.get_variables_to_restore(
+    #   exclude=['InceptionV3/AuxLogits', 'InceptionV3/Logits', 'global_step'])
 
     saver = tf.train.Saver(all_vars)
     saver.restore(self.tf_session, checkpoint_path)
