@@ -463,7 +463,7 @@ def default_args(argv):
         'runner': 'DirectRunner',
     }
 
-  for kk, vv in default_values.items():
+  for kk, vv in default_values.iteritems():
     if kk not in parsed_args or not vars(parsed_args)[kk]:
       vars(parsed_args)[kk] = vv
 
